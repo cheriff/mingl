@@ -8,11 +8,36 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+struct global {
+    struct { int width, height; } framebuffer;
+    struct { int width, height; } window;
+    glm::mat4 projection;
+};
+
+static void
+window_size(GLFWwindow *window, int width, int height)
+{
+    auto *globals = (struct global*)glfwGetWindowUserPointer(window);
+    assert(globals != NULL);
+
+    globals->window.width = width;
+    globals->window.height = height;
+    float aspect = (float)width / (float)height;
+    globals->projection = glm::perspective(45.0f, aspect, 0.1f, 100.0f);
+    printf("Window size      : %dx%d\n", globals->window.width, globals->window.height);
+}
+
 static void
 framebuffer_size(GLFWwindow *window, int width, int height)
 {
-    printf("Window resize: %d x %d\n", width, height);
+    auto *globals = (struct global*)glfwGetWindowUserPointer(window);
+    assert(globals != NULL);
+
+    globals->framebuffer.width = width;
+    globals->framebuffer.height = height;
+    printf("Framebuffer size : %dx%d\n", globals->framebuffer.width, globals->framebuffer.height);
 }
+
 
 void
 key_action(GLFWwindow *window, int,int,int,int)
@@ -24,6 +49,7 @@ key_action(GLFWwindow *window, int,int,int,int)
 int
 main(int argc, char *argv[])
 {
+    struct global globals;
     if (!glfwInit()) {
         return -1;
     }
@@ -38,9 +64,11 @@ main(int argc, char *argv[])
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
         window = glfwCreateWindow(800, 480, argv[0], NULL, NULL);
+        glfwSetWindowUserPointer(window, &globals);
         assert(window != NULL);
 
         glfwSetFramebufferSizeCallback(window, framebuffer_size);
+        glfwSetWindowSizeCallback(window, window_size);
         glfwSetKeyCallback(window, key_action);
         glfwMakeContextCurrent(window);
 
@@ -54,10 +82,13 @@ main(int argc, char *argv[])
         glfwSwapInterval(1);
     }
 
-    int width, height;
     {
+        int width, height;
         glfwGetFramebufferSize(window, &width, &height);
         framebuffer_size(window, width, height);
+
+        glfwGetWindowSize(window, &width, &height);
+        window_size(window, width, height);
     }
 
     GLuint shader;
@@ -94,6 +125,7 @@ main(int argc, char *argv[])
         assert(is_ok == GL_TRUE && "Failed to link shader");
     }
 
+    glUseProgram(shader);
     while (!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glfwSwapBuffers(window);
