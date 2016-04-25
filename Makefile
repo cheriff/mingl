@@ -1,6 +1,6 @@
 all: mingle
 
-CFLAGS=-O3 -Wall -Werror
+CFLAGS=-O3 -Wall -Werror --std=c++11
 LDFLAGS=
 
 include external_code.mk
