@@ -22,3 +22,6 @@ clean:
 	rm -f $(OBJ) mingle
 deepclean: clean
 	rm -rf extern
+
+run: all
+	./mingle
