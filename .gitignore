@@ -1,0 +1,4 @@
+mingle
+*.o
+.*.sw?
+extern/
