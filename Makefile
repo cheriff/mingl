@@ -1,5 +1,6 @@
 all: mingle
 
+CC=g++
 CFLAGS=-O3 -Wall -Werror --std=c++11 -Iinclude
 LDFLAGS=
 
@@ -15,7 +16,7 @@ mingle: $(OBJ) $(LIBS)
 build:
 	mkdir build
 
-build/main.o: include/shader.h
+build/main.o: include/shader.h include/model.h
 
 $(OBJ): build/%.o : src/%.cpp | build extern
 	$(CC) $(CFLAGS) -c $< -o $@
