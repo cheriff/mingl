@@ -1,16 +1,23 @@
-TARGETS+=basic_window
+define DOIT
+TARGETS+=$(NAME)
 
-basic_window_SRC=$(wildcard 01-basic_window/*.cpp)
-basic_window_OBJ=$(patsubst 01-basic_window/%,build/01/%,$(patsubst %.cpp,%.o,$(basic_window_SRC)))
+$(eval $(NAME)_SRC=$(wildcard $(NUM)-$(NAME)/*.cpp))
+$(eval $(NAME)_OBJ=$(patsubst $(NUM)-$(NAME)/%,build/$(NUM)/%,$(patsubst %.cpp,%.o,$($(NAME)_SRC))))
 
-build/01:
-	@mkdir -p $@
+build/$(NUM):
+	@mkdir -p $$@
 
-$(basic_window_OBJ): build/01/%.o : 01-basic_window/%.cpp | build/01
-	$(CC) -c $(CFLAGS) -o$@ $<
+$($(NAME)_OBJ): build/$(NUM)/%.o : $(NUM)-$(NAME)/%.cpp | build/$(NUM)
+	$(CC) -c $(CFLAGS) -o$$@ $$<
 
-basic_window: $(basic_window_OBJ)
-	$(CC) $(basic_window_OBJ) $(LDFLAGS) -o $@
+$(NAME): $($(NAME)_OBJ)
+	$(CC) $($(NAME)_OBJ) $(LDFLAGS) -o $$@
+endef
+
+
+NUM=01
+NAME=basic_window
+$(eval $(DOIT))
 
 
 
