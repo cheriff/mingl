@@ -1,6 +1,7 @@
-extern: glfw glm
+extern: glfw glm imgui
 GOOD_GLFW_REV=d97044d9acc0c76433edda5a75b3196957906ca5
 GOOD_GLM_REV=79643cf4fa210ed8a5509243ef4613b555a9441c
+GOOD_IMGUI_REV=c5149cd53c80d022e6924b20e964544e9537cb20
 
 
 GLFW_SRC=extern/code/glfw-src/README.md
@@ -51,5 +52,26 @@ LDFLAGS+=-Lextern/lib -lglfw3 \
 	-framework CoreVideo  -framework Carbon
 
 
+imgui: extern/include/imgui.h extern/include/imconfig.h extern/lib/libimgui.a
+
+IMGUI_SRC=extern/code/imgui-src/README.md
+
+extern/code/imgui-src/imgui.h: $(IMGUI_SRC)
+extern/code/imgui-src/imgui.cpp: $(IMGUI_SRC)
+extern/code/imgui-src/imconf.h: $(IMGUI_SRC)
+
+extern/include/%.h: extern/code/imgui-src/%.h
+	cp $< $@
+
+extern/code/imgui-src/%.o: extern/code/imgui-src/%.cpp
+	$(CC)  $(CFLAGS) -c $^ -o $@
+
+extern/lib/libimgui.a: extern/code/imgui-src/imgui.o extern/code/imgui-src/imgui_draw.o
+	$(AR) cr $@ $^
+
+
+$(IMGUI_SRC):
+	git clone https://github.com/ocornut/imgui.git extern/code/imgui-src
+	(cd extern/code/imgui-src && git reset --hard $(GOOD_IMGUI_REV))
 
 
