@@ -1,30 +1,21 @@
-all: mingle
+all: apps
 
 CC=g++
 CFLAGS=-O3 -Wall -Werror --std=c++11 -Iinclude
 LDFLAGS=
 
 include external_code.mk
+include $(wildcard ??-*/target.mk)
 
-SRC=$(wildcard src/*.cpp)
-OBJ=$(patsubst src/%,build/%,$(patsubst %.cpp,%.o,$(SRC)))
-
-mingle: $(OBJ) $(LIBS)
-	$(CC) $(OBJ) $(LDFLAGS) -o $@
-
-
-build:
-	mkdir build
-
-build/main.o: include/shader.h include/model.h
-
-$(OBJ): build/%.o : src/%.cpp | build extern
-	$(CC) $(CFLAGS) -c $< -o $@
+apps: $(TARGETS)
 
 clean:
-	rm -f $(OBJ) mingle
+	rm -rf build
+	rm -f $(TARGETS)
 deepclean: clean
 	rm -rf extern
 
-run: all
-	./mingle
+# by default run the target with the higher numbered prefix in its src dir
+run: $(lastword $(TARGETS))
+	./$<
+

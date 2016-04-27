@@ -1,4 +1,4 @@
-mingle
+basic_window
 *.o
 .*.sw?
 extern/
