@@ -7,7 +7,7 @@ LDFLAGS=
 include external_code.mk
 include $(wildcard ??-*/target.mk)
 
-apps: $(TARGETS)
+apps: $(EXTERN) $(TARGETS)
 
 clean:
 	rm -rf build

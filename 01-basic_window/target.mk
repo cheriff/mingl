@@ -7,10 +7,10 @@ $(eval $(NAME)_OBJ=$(patsubst $(NUM)-$(NAME)/%,build/$(NUM)/%,$(patsubst %.cpp,%
 build/$(NUM):
 	@mkdir -p $$@
 
-$($(NAME)_OBJ): build/$(NUM)/%.o : $(NUM)-$(NAME)/%.cpp | build/$(NUM)
+$($(NAME)_OBJ): build/$(NUM)/%.o : $(NUM)-$(NAME)/%.cpp | build/$(NUM) $(EXTERN)
 	$(CC) -c $(CFLAGS) -o$$@ $$<
 
-$(NAME): $($(NAME)_OBJ)
+$(NAME): $($(NAME)_OBJ) $(EXTERN)
 	$(CC) $($(NAME)_OBJ) $(LDFLAGS) -o $$@
 endef
 
