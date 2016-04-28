@@ -1,7 +1,7 @@
 all: apps
 
 CC=g++
-CFLAGS=-O3 -Wall -Werror --std=c++11 -Iinclude
+CFLAGS=-O3 -Wall -Werror --std=c++11 -Iinclude -Iextern/include
 LDFLAGS=
 
 include external_code.mk
