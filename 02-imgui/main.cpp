@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #define GLFW_INCLUDE_GLCOREARB 1
-
 #include <GLFW/glfw3.h>
 
 #include <glm/vec3.hpp>
@@ -9,6 +8,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
+
+#include "globals.h"
 
 #include "imgui.h"
 #include "uibind.h"
@@ -20,11 +21,6 @@
          if (errcount)  assert(!"GL Errors. Aborting");\
     } while (0);
 
-struct global {
-    struct { int width, height; } framebuffer;
-    struct { int width, height; } window;
-    glm::mat4 projection;
-};
 
 static void 
 mouse_button(GLFWwindow *window, int button, int action, int mods)
@@ -47,6 +43,9 @@ scroll_wheel(GLFWwindow *window, double x, double y)
 static void
 char_action(GLFWwindow *window, unsigned int c)
 {
+    auto *globals = (struct global*)glfwGetWindowUserPointer(window);
+    assert(globals != NULL);
+    ui_keycode(globals->ui, c);
     printf("Unicode: %x\n", c);
 }
 
@@ -111,7 +110,6 @@ main(int argc, char *argv[])
         glfwSetMouseButtonCallback(window, mouse_button);
         glfwSetCursorPosCallback(window, cursor_pos);
         glfwSetScrollCallback(window, scroll_wheel);
-
         glfwSetCharCallback(window, char_action);
 
         const GLubyte* renderer = glGetString (GL_RENDERER); // get renderer string
@@ -123,6 +121,9 @@ main(int argc, char *argv[])
 
         glfwSwapInterval(1);
     }
+
+
+    globals.ui = ui_init(&globals);
 
     {
         int width, height;
@@ -210,6 +211,7 @@ main(int argc, char *argv[])
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     catchGlError();
     while (!glfwWindowShouldClose(window)) {
+        ui_startframe(globals.ui);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto translate_vec = glm::vec3(0,0, -2);
@@ -231,11 +233,13 @@ main(int argc, char *argv[])
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        ui_endrame(globals.ui);
         glfwSwapBuffers(window);
         glfwPollEvents();
         catchGlError();
     }
 
+    ui_destroy(globals.ui);
     glfwDestroyWindow(window);
     glfwTerminate();
     printf("Goodbye\n");

@@ -11,12 +11,13 @@ $($(NAME)_OBJ): build/$(NUM)/%.o : $(NUM)-$(NAME)/%.cpp | build/$(NUM) $(EXTERN)
 	$(CC) -c $(CFLAGS) -o$$@ $$<
 
 $(NAME): $($(NAME)_OBJ) $(EXTERN)
-	$(CC) $($(NAME)_OBJ) $(LDFLAGS) -o $$@
+	$(CC) $($(NAME)_OBJ) $(LDFLAGS) $(EXTRA_LIBS) -o $$@
 endef
 
 
 NUM=02
 NAME=imgui
+EXTRA_LIBS=-limgui
 $(eval $(DOIT))
 
 
