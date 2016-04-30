@@ -12,7 +12,7 @@
 #include "globals.h"
 
 #include "imgui.h"
-#include "uibind.h"
+#include "bind_imgui.h"
 
 #define catchGlError() \
     do { int errcount = 0;\
@@ -22,16 +22,21 @@
     } while (0);
 
 
+
 static void 
 mouse_button(GLFWwindow *window, int button, int action, int mods)
 {
     printf("Mouse button: %d %d %d\n", button, action, mods);
+    auto *globals = (struct global*)glfwGetWindowUserPointer(window);
+    assert(globals != NULL);
 }
 
 static void
 cursor_pos(GLFWwindow *window, double x, double y)
 {
     printf("Cursor pos %f %f\n", x, y);
+    auto *globals = (struct global*)glfwGetWindowUserPointer(window);
+    assert(globals != NULL);
 }
 
 static void 
@@ -45,7 +50,6 @@ char_action(GLFWwindow *window, unsigned int c)
 {
     auto *globals = (struct global*)glfwGetWindowUserPointer(window);
     assert(globals != NULL);
-    ui_keycode(globals->ui, c);
     printf("Unicode: %x\n", c);
 }
 
@@ -123,7 +127,8 @@ main(int argc, char *argv[])
     }
 
 
-    globals.ui = ui_init(&globals);
+    globals.glwindow = window;
+    ImGui_ImplGlfwGL3_Init(window, /* install_callbacks = */ true);
 
     {
         int width, height;
@@ -211,7 +216,7 @@ main(int argc, char *argv[])
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     catchGlError();
     while (!glfwWindowShouldClose(window)) {
-        ui_startframe(globals.ui);
+        ImGui_ImplGlfwGL3_NewFrame();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto translate_vec = glm::vec3(0,0, -2);
@@ -233,13 +238,16 @@ main(int argc, char *argv[])
 
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        ui_endrame(globals.ui);
+        ImGui::ShowMetricsWindow();
+
+        ImGui::Render() ;
+
         glfwSwapBuffers(window);
         glfwPollEvents();
         catchGlError();
     }
 
-    ui_destroy(globals.ui);
+    ImGui_ImplGlfwGL3_Shutdown();
     glfwDestroyWindow(window);
     glfwTerminate();
     printf("Goodbye\n");
