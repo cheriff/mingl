@@ -139,8 +139,10 @@ void ImGui_ImplGlfwGL3_ScrollCallback(GLFWwindow*, double /*xoffset*/, double yo
     g_MouseWheel += (float)yoffset; // Use fractional mouse wheel, 1.0 unit 5 lines.
 }
 
-void ImGui_ImplGlfwGL3_KeyCallback(GLFWwindow*, int key, int, int action, int mods)
+void ImGui_ImplGlfwGL3_KeyCallback(GLFWwindow *window, int key, int, int action, int mods)
 {
+    if (key == GLFW_KEY_ESCAPE)
+        glfwSetWindowShouldClose(window, 1);
     ImGuiIO& io = ImGui::GetIO();
     if (action == GLFW_PRESS)
         io.KeysDown[key] = true;
