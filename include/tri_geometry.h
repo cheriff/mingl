@@ -7,8 +7,7 @@ static struct {
     const int num_triangles;
     const int data_size;
     float data[NUM_FLOAT];
-} model =
-
+} triangle_geometry =
 {
     .num_triangles = NUM_TRI,
     .data_size = NUM_BYTES,

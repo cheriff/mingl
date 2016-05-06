@@ -14,6 +14,10 @@ $(NAME): $($(NAME)_OBJ) $(EXTERN)
 	$(CC) $($(NAME)_OBJ) $(LDFLAGS) $(EXTRA_LIBS) -o $$@
 endef
 
+build/02/material.o: 02-imgui/Material.h
+
+
+
 
 NUM=02
 NAME=imgui

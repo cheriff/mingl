@@ -14,6 +14,9 @@
 #include "imgui.h"
 #include "bind_imgui.h"
 
+#include "Material.h"
+#include "Model.h"
+
 #define catchGlError() \
     do { int errcount = 0;\
          GLenum err;\
@@ -26,7 +29,7 @@
 static void 
 mouse_button(GLFWwindow *window, int button, int action, int mods)
 {
-    printf("Mouse button: %d %d %d\n", button, action, mods);
+    //printf("Mouse button: %d %d %d\n", button, action, mods);
     auto *globals = (struct global*)glfwGetWindowUserPointer(window);
     assert(globals != NULL);
 }
@@ -34,7 +37,7 @@ mouse_button(GLFWwindow *window, int button, int action, int mods)
 static void
 cursor_pos(GLFWwindow *window, double x, double y)
 {
-    printf("Cursor pos %f %f\n", x, y);
+    //printf("Cursor pos %f %f\n", x, y);
     auto *globals = (struct global*)glfwGetWindowUserPointer(window);
     assert(globals != NULL);
 }
@@ -42,7 +45,7 @@ cursor_pos(GLFWwindow *window, double x, double y)
 static void 
 scroll_wheel(GLFWwindow *window, double x, double y)
 {
-    printf("Scroll wheel: %f %f\n", x, y);
+    //printf("Scroll wheel: %f %f\n", x, y);
 }
 
 static void
@@ -50,7 +53,7 @@ char_action(GLFWwindow *window, unsigned int c)
 {
     auto *globals = (struct global*)glfwGetWindowUserPointer(window);
     assert(globals != NULL);
-    printf("Unicode: %x\n", c);
+    //printf("Unicode: %x\n", c);
 }
 
 static void
@@ -82,7 +85,6 @@ void
 key_action(GLFWwindow *window, int,int,int,int)
 {
     printf("Key action\n");
-    glfwSetWindowShouldClose(window, 1);
 }
 
 int
@@ -140,77 +142,23 @@ main(int argc, char *argv[])
         framebuffer_size(window, width, height);
     }
 
-    GLuint shader;
-    int position_index, colour_index;
-    int projection_index, modelview_index;
-    {
-        #include "shader.h"
-        GLuint vsh;
-        {
-            vsh = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(vsh, 1, &vertex_shader, NULL);
-            glCompileShader(vsh);
-
-            int is_ok;
-            glGetShaderiv(vsh, GL_COMPILE_STATUS, &is_ok);
-            assert(is_ok == GL_TRUE && "Failed to compile vertex shader");
-        }
-        GLuint fsh;
-        {
-            fsh = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(fsh, 1, &fragment_shader, NULL);
-            glCompileShader(fsh);
-
-            int is_ok;
-            glGetShaderiv(fsh, GL_COMPILE_STATUS, &is_ok);
-            assert(is_ok == GL_TRUE && "Failed to compile fragment shader");
-        }
-
-        shader = glCreateProgram ();
-        glAttachShader(shader, vsh);
-        glAttachShader(shader, fsh);
-        glLinkProgram(shader);
-
-        int is_ok = 42;
-        glGetProgramiv(shader, GL_LINK_STATUS, &is_ok);
-        assert(is_ok == GL_TRUE && "Failed to link shader");
-
-        position_index = glGetAttribLocation(shader, "position");
-        assert(position_index != -1);
-
-        colour_index = glGetAttribLocation(shader, "colour");
-        assert(colour_index != -1);
-
-        projection_index = glGetUniformLocation(shader, "projection");
-        assert(projection_index != -1);
-
-        modelview_index = glGetUniformLocation(shader, "modelview");
-        assert(modelview_index != -1);
-    }
+    auto material = getDefaultMaterial();
+    dumpMaterial(material);
     catchGlError();
 
-    GLuint vao;
-    int num_triangles;
+    auto model = getDefaultModel();
+    dumpModel(model);
+    catchGlError();
+
+#if 0
     {
-        GLuint vbo;
-        #include "model.h"
-        glGenBuffers(1, &vbo);
-        glBindBuffer (GL_ARRAY_BUFFER, vbo);
-        glBufferData (GL_ARRAY_BUFFER, model.data_size, model.data, GL_STATIC_DRAW);
-        num_triangles = model.num_triangles;
-
-        glGenVertexArrays(1, &vao);
-
-        glBindVertexArray(vao);
-        glBindBuffer (GL_ARRAY_BUFFER, vbo);
-
         glEnableVertexAttribArray(position_index);
         glVertexAttribPointer(position_index, 4, GL_FLOAT, 0, 0, (void*)0);
 
-        uintptr_t offset_to_colours = sizeof(float)*num_triangles*4*3;
         glEnableVertexAttribArray(colour_index);
         glVertexAttribPointer(colour_index  , 4, GL_FLOAT, 0, 0, (void*)offset_to_colours );
     }
+#endif
     catchGlError();
 
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -228,15 +176,16 @@ main(int argc, char *argv[])
         modelview = glm::rotate   (modelview, rot+=0.05f, rotate_vec);
 
 
+#if 0
         glUseProgram(shader);
         glBindVertexArray(vao);
-
         glUniformMatrix4fv(projection_index,
                 1, GL_FALSE, glm::value_ptr(globals.projection));
         glUniformMatrix4fv(modelview_index,
                 1, GL_FALSE, glm::value_ptr(modelview));
-
         glDrawArrays(GL_TRIANGLES, 0, 3);
+#endif
+
 
         ImGui::ShowMetricsWindow();
 
