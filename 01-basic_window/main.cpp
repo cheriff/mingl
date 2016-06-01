@@ -154,11 +154,11 @@ main(int argc, char *argv[])
     int num_triangles;
     {
         GLuint vbo;
-        #include "model.h"
+        #include "tri_geometry.h"
         glGenBuffers(1, &vbo);
         glBindBuffer (GL_ARRAY_BUFFER, vbo);
-        glBufferData (GL_ARRAY_BUFFER, model.data_size, model.data, GL_STATIC_DRAW);
-        num_triangles = model.num_triangles;
+        glBufferData (GL_ARRAY_BUFFER, triangle_geometry.data_size, triangle_geometry.data, GL_STATIC_DRAW);
+        num_triangles = triangle_geometry.num_triangles;
 
         glGenVertexArrays(1, &vao);
 
