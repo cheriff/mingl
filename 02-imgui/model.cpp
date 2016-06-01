@@ -46,7 +46,7 @@ getDefaultModel(void)
 
     ml = {
         .name = "colour",
-        .offset = sizeof(float)*num_triangles*4*3,
+        .offset = static_cast<unsigned int>(sizeof(float))*num_triangles*4*3,
         .stride = 0,
         .elem_type = GL_FLOAT,
         .elem_count = 4,
@@ -54,6 +54,24 @@ getDefaultModel(void)
     ret->attributes.push_back(ml);
 
     return ret;
+}
+
+ModelGroup *
+getGroup(Model *m, const char *name)
+{
+    for(auto g = m->groups.begin(); g != m->groups.end(); ++g) {
+        if (strcmp(g->name, name) == 0) return &(*g);
+    }
+    return NULL;
+}
+
+ModelLayout *
+getAttribute(Model *m, const char *name)
+{
+    for(auto attr = m->attributes.begin(); attr != m->attributes.end(); ++attr) {
+        if (strcmp(attr->name, name) == 0) return &(*attr);
+    }
+    return NULL;
 }
 
 void

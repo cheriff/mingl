@@ -17,6 +17,9 @@ struct Material {
 
 Material * getDefaultMaterial(void);
 
+BindPoint *getUniform(Material *m, const char *name);
+BindPoint *getAttribute(Material *m, const char *name);
+
 void dumpMaterial(Material*);
 
 

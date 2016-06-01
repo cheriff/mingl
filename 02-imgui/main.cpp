@@ -127,10 +127,11 @@ main(int argc, char *argv[])
 
         glfwSwapInterval(1);
     }
-
+    catchGlError();
 
     globals.glwindow = window;
     ImGui_ImplGlfwGL3_Init(window, /* install_callbacks = */ true);
+    catchGlError();
 
     {
         int width, height;
@@ -141,24 +142,30 @@ main(int argc, char *argv[])
         glfwGetFramebufferSize(window, &width, &height);
         framebuffer_size(window, width, height);
     }
+    catchGlError();
 
     auto material = getDefaultMaterial();
     dumpMaterial(material);
     catchGlError();
 
+    const int projection_index = getUniform(material, "projection")->location;
+    const int modelview_index = getUniform(material, "modelview")->location;
+
     auto model = getDefaultModel();
     dumpModel(model);
     catchGlError();
 
-#if 0
-    {
-        glEnableVertexAttribArray(position_index);
-        glVertexAttribPointer(position_index, 4, GL_FLOAT, 0, 0, (void*)0);
+    for (auto attr: material->attributes) {
+        glEnableVertexAttribArray(attr.location);
+        ModelLayout *layout = getAttribute(model, attr.name);
 
-        glEnableVertexAttribArray(colour_index);
-        glVertexAttribPointer(colour_index  , 4, GL_FLOAT, 0, 0, (void*)offset_to_colours );
+        glVertexAttribPointer(attr.location,
+                layout->elem_count, layout->elem_type,
+                0 , //normalised
+                layout->stride,
+                (void*)(uintptr_t)(layout->offset));
+
     }
-#endif
     catchGlError();
 
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -176,15 +183,13 @@ main(int argc, char *argv[])
         modelview = glm::rotate   (modelview, rot+=0.05f, rotate_vec);
 
 
-#if 0
-        glUseProgram(shader);
-        glBindVertexArray(vao);
+        glUseProgram(material->program);
+        glBindVertexArray(model->vao);
         glUniformMatrix4fv(projection_index,
                 1, GL_FALSE, glm::value_ptr(globals.projection));
         glUniformMatrix4fv(modelview_index,
                 1, GL_FALSE, glm::value_ptr(modelview));
         glDrawArrays(GL_TRIANGLES, 0, 3);
-#endif
 
 
         ImGui::ShowMetricsWindow();

@@ -12,7 +12,6 @@ struct ModelLayout {
     const char *name;
     unsigned int offset;
     unsigned int stride;
-    int type;
     int elem_type;
     int elem_count;
 };
@@ -26,6 +25,8 @@ struct Model {
 };
 
 Model * getDefaultModel(void);
+ModelGroup *getGroup(Model *m, const char *name);
+ModelLayout *getAttribute(Model *m, const char *name);
 void dumpModel(Model*);
 
 #endif // __MODEL_H__

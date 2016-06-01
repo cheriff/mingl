@@ -103,3 +103,21 @@ dumpMaterial(Material *mat)
         printf("  Type    : %d\n", bp.type);
     });
 }
+
+BindPoint *
+getAttribute(Material *m, const char *name)
+{
+    for(auto attr = m->attributes.begin(); attr != m->attributes.end(); ++attr) {
+        if (strcmp(attr->name, name) == 0) return &(*attr);
+    }
+    return NULL;
+}
+
+BindPoint *
+getUniform(Material *m, const char *name)
+{
+    for(auto uni = m->uniforms.begin(); uni != m->uniforms.end(); ++uni) {
+        if (strcmp(uni->name, name) == 0) return &(*uni);
+    }
+    return NULL;
+}
