@@ -1,12 +1,27 @@
-EXTERN=$(GLFW_DEP) $(GLM_DEP) $(IMGUI_DEP)
+EXTERN=$(GLFW_DEP) $(GLM_DEP) $(IMGUI_DEP) $(OBJCONV_DEP)
 
 GOOD_GLFW_REV=d97044d9acc0c76433edda5a75b3196957906ca5
 GOOD_GLM_REV=79643cf4fa210ed8a5509243ef4613b555a9441c
 GOOD_IMGUI_REV=c5149cd53c80d022e6924b20e964544e9537cb20
 
-extern/lib extern/include:
+extern/lib extern/include extern/bin:
 	@mkdir -p extern/lib
 	@mkdir -p extern/include
+	@mkdir -p extern/bin
+
+OBJCONV_DEP=extern/bin/objconv
+
+extern/bin/objconv: extern/code/objconv/objconv | extern/bin
+	cp $^ $@
+
+extern/code/objconv/objconv: extern/code/objconv/Makefile
+	$(MAKE) -C extern/code/objconv
+
+extern/code/objconv/Makefile:
+	git clone github.com:cheriff/objconv extern/code/objconv
+	# Don't move to a 'good' version yet, since we're developing off tip for now
+	#(cd extern/code/glfw-src && git reset --hard $(GOOD_GLFW_REV))
+
 
 
 GLFW_SRC=extern/code/glfw-src/README.md
