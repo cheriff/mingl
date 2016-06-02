@@ -3,4 +3,13 @@ imgui
 imgui.ini
 *.o
 .*.sw?
-extern/
+
+extern/include
+extern/lib/*.a
+extern/bin/objconv
+extern/code/glfw-obj
+extern/code/glfw-src
+extern/code/glm-src
+extern/code/imgui-src
+extern/code/objconv
+
