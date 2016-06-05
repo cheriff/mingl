@@ -39,7 +39,6 @@ Model::Model()
     attributes.push_back(ModelLayout(col_name, col_offset, col_stride, col_elem_type, col_elem_count));
 }
 
-
 void Model::dump()
 {
 }

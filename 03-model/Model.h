@@ -28,7 +28,9 @@ struct ModelLayout {
 };
 
 struct Model {
+    // create default model (colourful triangle0
     Model();
+    Model(std::ifstream &fin, const std::string name="NoName");
     void dump();
 
     const std::string name;
@@ -48,6 +50,7 @@ struct Model {
 
     std::vector<ModelGroup> groups;
     std::vector<ModelLayout> attributes;
+    const char *error;
 };
 
 Model * getDefaultModel(void);

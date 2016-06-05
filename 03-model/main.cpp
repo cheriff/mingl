@@ -9,6 +9,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include <fstream>
+
 #include "globals.h"
 
 #include "imgui.h"
@@ -151,7 +153,20 @@ main(int argc, char *argv[])
     const int projection_index = material.uniform("projection").location;
     const int modelview_index  = material.uniform("modelview").location;
 
-    auto model = Model();
+    const char *modelname = "model.objb";
+    std::ifstream model_file(modelname, std::ios::in|std::ios::binary);
+    if (!model_file) {
+        printf("No such fie: %s\n", modelname);
+        return 0;
+    }
+
+    auto model = Model(model_file, modelname);
+    if (model.error) {
+        printf("Load ERROR: %s\n", model.error);
+        return 0;
+    }
+    printf("Load OK\n");
+    return 0;
     model.dump();
     catchGlError();
 
