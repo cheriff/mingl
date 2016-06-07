@@ -121,6 +121,7 @@ Model::Model(std::ifstream &fin, const std::string name)
                                  header.index_count * sizeof_gltype(header.index_type) +
                                  header.buffsize;
     if (fsize < expected_size) {
+        printf("is %d big, expected %d\n", (int)fsize, (int)expected_size);
         // File is too small to contain what the header promises it does.
         error = "File too small";
         return;
@@ -137,6 +138,9 @@ Model::Model(std::ifstream &fin, const std::string name)
     for (int i=0; i<header.num_attrs; i++) {
         FileAttr attr;
         do_read(fin, attr);
+        attributes.push_back(ModelLayout(attr.name,
+                    attr.offset, attr.stride,
+                    attr.elem_type, attr.elem_count));
 
         printf("Attr: %d : %s\n", i, attr.name);
         printf("    Element type %x, count %d\n",
@@ -148,11 +152,43 @@ Model::Model(std::ifstream &fin, const std::string name)
     for (int i=0; i<header.num_groups; i++) {
         FileGroup group;
         do_read(fin, group);
+        groups.push_back(ModelGroup(group.name, group.base, group.count));
 
         printf("Group: %d : %s\n", i, group.name);
         printf("    Index base: %d\n", group.base);
         printf("    Index count: %d\n", group.count);
     }
+
+    const size_t idx_sz = header.index_count * sizeof_gltype(header.index_type);
+    indices = std::unique_ptr<uint8_t[]>(new uint8_t[idx_sz]);
+    fin.read(reinterpret_cast<char *>(indices.get()), idx_sz);
+
+    if (header.index_type == GL_UNSIGNED_BYTE) {
+        uint8_t *ptr = static_cast<uint8_t *>(indices.get());
+        for (int i=0; i< header.index_count; i++) {
+            printf("Idx[%d] = %d\n", i, ptr[i]);
+        }
+    }
+    else if (header.index_type == GL_UNSIGNED_SHORT) {
+        uint16_t *ptr = reinterpret_cast<uint16_t *>(indices.get());
+        for (int i=0; i< header.index_count; i++) {
+            printf("Idx[%d] = %d\n", i, ptr[i]);
+        }
+    }
+    else if (header.index_type == GL_UNSIGNED_INT) {
+        uint32_t *ptr = reinterpret_cast<uint32_t *>(indices.get());
+        for (int i=0; i< header.index_count; i++) {
+            printf("Idx[%d] = %d\n", i, ptr[i]);
+        }
+    }
+    else printf("WTF FTYPE\n");
+
+
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+
+    glBindVertexArray(vao);
+    glBindBuffer (GL_ARRAY_BUFFER, vbo);
 
     printf("Loaded %s\n", name.c_str());
     error = NULL;

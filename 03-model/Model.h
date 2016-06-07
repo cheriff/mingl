@@ -3,13 +3,16 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+#include <memory>
 
 struct ModelGroup {
-    ModelGroup(const std::string name, const int num_t) :
-        name(name), num_triangles(num_t) {}
+    ModelGroup(const std::string name, const int num_t, const int base_t) :
+        name(name), num_triangles(num_t), base(base_t) {}
 
     const std::string name;
     int num_triangles;
+    int base;
 };
 
 struct ModelLayout {
@@ -43,14 +46,18 @@ struct Model {
     }
 
     ModelLayout attribute(const std::string a_name) {
-        for(auto attr : attributes)
+        for(auto attr : attributes) {
             if (attr.name == a_name) return attr;
+        }
+        printf("No such for %s\n", a_name.c_str());
         throw "No attrname";
     }
 
     std::vector<ModelGroup> groups;
     std::vector<ModelLayout> attributes;
     const char *error;
+    std::unique_ptr<uint8_t[]> buffer;
+    std::unique_ptr<uint8_t[]> indices;
 };
 
 Model * getDefaultModel(void);

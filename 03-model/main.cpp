@@ -147,7 +147,6 @@ main(int argc, char *argv[])
     catchGlError();
 
     Material material{};
-    material.dump();
     catchGlError();
 
     const int projection_index = material.uniform("projection").location;
@@ -166,9 +165,13 @@ main(int argc, char *argv[])
         return 0;
     }
     printf("Load OK\n");
-    return 0;
+
     model.dump();
     catchGlError();
+
+    printf("\n\n");
+    auto defmodel = Model();
+    defmodel.dump();
 
     for (auto attr: material.attributes) {
         glEnableVertexAttribArray(attr.location);

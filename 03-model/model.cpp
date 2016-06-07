@@ -21,8 +21,9 @@ Model::Model()
             triangle_geometry.data, GL_STATIC_DRAW);
 
     int num_triangles = triangle_geometry.num_triangles;
+    int triangle_base = 0;
 
-    groups.push_back(ModelGroup("MainGroup", num_triangles));
+    groups.push_back(ModelGroup("MainGroup", num_triangles, triangle_base));
 
     const std::string pos_name = "position";
     const unsigned int pos_offset = 0;
@@ -41,4 +42,22 @@ Model::Model()
 
 void Model::dump()
 {
+    std::cout << "Model: " << name << std::endl;
+    std::cout << " VAO: " << vao << std::endl;
+    std::cout << " VBO: " << vbo << std::endl;
+    std::cout << " ATTRS: " << attributes.size() << std::endl;
+    for (auto a: attributes) {
+        std::cout << " Attr: " << a.name << std::endl;
+        std::cout << "    offset: " << a.offset << std::endl;
+        std::cout << "    stride: " << a.stride << std::endl;
+        std::cout << "    elem_type: " << a.elem_type << std::endl;
+        std::cout << "    elem_count: " << a.elem_count << std::endl;
+    }
+    std::cout << " GROUPS: " << groups.size() << std::endl;
+    for (auto g: groups) {
+        std::cout << " Group: " << g.name << std::endl;
+        std::cout << "    num_triangles: " << g.num_triangles << std::endl;
+        std::cout << "    base: " << g.base << std::endl;
+    }
+
 }
