@@ -6,6 +6,8 @@ imgui.ini
 *.o
 .*.sw?
 
+triangle.objb
+
 extern/include
 extern/lib/*.a
 extern/bin/objconv
