@@ -3,7 +3,9 @@ imgui
 model
 
 imgui.ini
+*.d
 *.o
+*.objb
 .*.sw?
 
 triangle.objb
