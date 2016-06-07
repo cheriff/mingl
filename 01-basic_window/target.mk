@@ -12,6 +12,11 @@ $($(NAME)_OBJ): build/$(NUM)/%.o : $(NUM)-$(NAME)/%.cpp | build/$(NUM) $(EXTERN)
 
 $(NAME): $($(NAME)_OBJ) $(EXTERN)
 	$(CC) $($(NAME)_OBJ) $(LDFLAGS) -o $$@
+
+DEPS += $($(NAME)_OBJ:.o=.d)
+build/$(NUM)/%.d : $(NUM)-$(NAME)/%.cpp | build/$(NUM)
+	$(CC) $(CFLAGS) -MF"$$@" -MG -MM -MP -MT"$$(@:.d=.o)" "$$<"
+
 endef
 
 
