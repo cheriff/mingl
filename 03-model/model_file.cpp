@@ -159,30 +159,25 @@ Model::Model(std::ifstream &fin, const std::string name)
         printf("    Index count: %d\n", group.count);
     }
 
-    const size_t idx_sz = header.index_count * sizeof_gltype(header.index_type);
-    indices = std::unique_ptr<uint8_t[]>(new uint8_t[idx_sz]);
-    fin.read(reinterpret_cast<char *>(indices.get()), idx_sz);
-
+    IndexList indices;
     if (header.index_type == GL_UNSIGNED_BYTE) {
-        uint8_t *ptr = static_cast<uint8_t *>(indices.get());
-        for (int i=0; i< header.index_count; i++) {
-            printf("Idx[%d] = %d\n", i, ptr[i]);
-        }
+        indices = IndexList(sizeof(uint8_t), header.index_count);
     }
     else if (header.index_type == GL_UNSIGNED_SHORT) {
-        uint16_t *ptr = reinterpret_cast<uint16_t *>(indices.get());
-        for (int i=0; i< header.index_count; i++) {
-            printf("Idx[%d] = %d\n", i, ptr[i]);
-        }
+        indices = IndexList(sizeof(uint16_t), header.index_count);
     }
     else if (header.index_type == GL_UNSIGNED_INT) {
-        uint32_t *ptr = reinterpret_cast<uint32_t *>(indices.get());
-        for (int i=0; i< header.index_count; i++) {
-            printf("Idx[%d] = %d\n", i, ptr[i]);
-        }
+        indices = IndexList(sizeof(uint32_t), header.index_count);
     }
-    else printf("WTF FTYPE\n");
 
+    fin.read(reinterpret_cast<char *>(indices.get()), indices.buff_sz());
+
+
+    printf("Indices:\n");
+    for(auto a : indices) {
+        printf("%d\n", a);
+
+    }
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
