@@ -152,28 +152,32 @@ main(int argc, char *argv[])
     const int projection_index = material.uniform("projection").location;
     const int modelview_index  = material.uniform("modelview").location;
 
+#if 1
+    printf("DEFAULT MODEL\n");
+    auto model = Model();
+#else
+    printf("LOADED MODEL\n");
     const char *modelname = "model.objb";
     std::ifstream model_file(modelname, std::ios::in|std::ios::binary);
     if (!model_file) {
         printf("No such fie: %s\n", modelname);
         return 0;
     }
-
     auto model = Model(model_file, modelname);
+#endif
+
     if (model.error) {
         printf("Load ERROR: %s\n", model.error);
         return 0;
     }
-    printf("Load OK\n");
-
-    model.dump();
     catchGlError();
 
-    printf("\n\n");
-    auto defmodel = Model();
-    defmodel.dump();
+
+    model.dump();
 
     for (auto attr: material.attributes) {
+        glBindVertexArray(model.vao);
+
         glEnableVertexAttribArray(attr.location);
         const ModelLayout layout = model.attribute(attr.name);
 
@@ -182,6 +186,8 @@ main(int argc, char *argv[])
                 0 , //normalised
                 layout.stride,
                 (void*)(uintptr_t)(layout.offset));
+
+        model.DumpData(layout);
 
     }
     catchGlError();
@@ -208,6 +214,7 @@ main(int argc, char *argv[])
         glUniformMatrix4fv(modelview_index,
                 1, GL_FALSE, glm::value_ptr(modelview));
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        catchGlError();
 
 
         ImGui::ShowMetricsWindow();

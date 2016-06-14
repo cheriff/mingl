@@ -22,7 +22,16 @@ compile_shader(char *text, GLenum shaderType)
     glGetShaderiv(sh, GL_COMPILE_STATUS, &is_ok);
     if (is_ok != GL_TRUE) {
         printf("Compile shader failed\n");
-        // TODO - better error reporting
+
+        int loglen;
+        glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &loglen);
+        char *log = (char*)alloca(loglen);
+
+        glGetShaderInfoLog(sh, loglen, NULL, log);
+        printf("%s\n", log);
+
+
+
         glDeleteShader(sh);
         return 0;
     }

@@ -107,13 +107,15 @@ Model::Model(std::ifstream &fin, const std::string name)
         return;
     }
 
-    printf("Loaded %s. Has %d attrs, %d groups\n",
-            header.name,
-            header.num_attrs, header.num_groups);
-    printf("Has %d indices of typs %x\n",
-            header.index_count, header.index_type);
+    if (0) {
+        printf("Loaded %s. Has %d attrs, %d groups\n",
+                header.name,
+                header.num_attrs, header.num_groups);
+        printf("Has %d indices of typs %x\n",
+                header.index_count, header.index_type);
 
-    printf("Buffsize = %d\n", header.buffsize);
+        printf("Buffsize = %d\n", header.buffsize);
+    }
 
     const size_t expected_size = sizeof(header) +
                                  header.num_attrs   * sizeof(FileAttr)                 +
@@ -133,7 +135,6 @@ Model::Model(std::ifstream &fin, const std::string name)
         error = "File larger than expected";
         return;
     }
-    printf("Assume file is %zu\n", expected_size);
 
     for (int i=0; i<header.num_attrs; i++) {
         FileAttr attr;
@@ -142,11 +143,13 @@ Model::Model(std::ifstream &fin, const std::string name)
                     attr.offset, attr.stride,
                     attr.elem_type, attr.elem_count));
 
-        printf("Attr: %d : %s\n", i, attr.name);
-        printf("    Element type %x, count %d\n",
-                attr.elem_type, attr.elem_count);
-        printf("    Offset %d\n", attr.offset);
-        printf("    Stride %d\n", attr.stride);
+        if (0) {
+            printf("Attr: %d : %s\n", i, attr.name);
+            printf("    Element type %x, count %d\n",
+                    attr.elem_type, attr.elem_count);
+            printf("    Offset %d\n", attr.offset);
+            printf("    Stride %d\n", attr.stride);
+        }
     }
 
     for (int i=0; i<header.num_groups; i++) {
@@ -154,36 +157,58 @@ Model::Model(std::ifstream &fin, const std::string name)
         do_read(fin, group);
         groups.push_back(ModelGroup(group.name, group.base, group.count));
 
-        printf("Group: %d : %s\n", i, group.name);
-        printf("    Index base: %d\n", group.base);
-        printf("    Index count: %d\n", group.count);
+        if (0) {
+            printf("Group: %d : %s\n", i, group.name);
+            printf("    Index base: %d\n", group.base);
+            printf("    Index count: %d\n", group.count);
+        }
     }
 
-    IndexList indices;
-    if (header.index_type == GL_UNSIGNED_BYTE) {
-        indices = IndexList(sizeof(uint8_t), header.index_count);
-    }
-    else if (header.index_type == GL_UNSIGNED_SHORT) {
-        indices = IndexList(sizeof(uint16_t), header.index_count);
-    }
-    else if (header.index_type == GL_UNSIGNED_INT) {
-        indices = IndexList(sizeof(uint32_t), header.index_count);
-    }
-
-    fin.read(reinterpret_cast<char *>(indices.get()), indices.buff_sz());
+    size_t idx_buffer_size = header.index_count * sizeof_gltype(header.index_type);
+    indices = std::unique_ptr<uint8_t[]>(new uint8_t[idx_buffer_size]);
+    fin.read(reinterpret_cast<char *>(indices.get()), idx_buffer_size);
+    assert((int)fin.tellg()  + header.buffsize == fsize);
 
 
-    printf("Indices:\n");
-    for(auto a : indices) {
-        printf("%d\n", a);
-
+    if (0) {
+        printf("Indices:\n");
+        if (header.index_type == GL_UNSIGNED_BYTE) {
+            uint8_t *bp = reinterpret_cast<uint8_t *>(indices.get());
+            for(int i=0; i<header.index_count; i++) {
+                printf("BIdx %d: %02x\n", i, bp[i]);
+            }
+        }
+        else if (header.index_type == GL_UNSIGNED_SHORT) {
+            uint16_t *bp = reinterpret_cast<uint16_t *>(indices.get());
+            for(int i=0; i<header.index_count; i++) {
+                printf("SIdx %d: %04x\n", i, bp[i]);
+            }
+        }
+        else if (header.index_type == GL_UNSIGNED_INT) {
+            uint32_t *bp = reinterpret_cast<uint32_t *>(indices.get());
+            for(int i=0; i<header.index_count; i++) {
+                printf("WIdx %d: %08x\n", i, bp[i]);
+            }
+        }
     }
+
+    buffsize = header.buffsize;
+    buffer = std::unique_ptr<uint8_t[]>(new uint8_t[buffsize]);
+    fin.read(reinterpret_cast<char *>(buffer.get()), buffsize);
+    assert((int)fin.tellg() == fsize);
+
+
+
 
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
 
     glBindVertexArray(vao);
     glBindBuffer (GL_ARRAY_BUFFER, vbo);
+
+    glBufferData (GL_ARRAY_BUFFER,
+            buffsize,
+            buffer.get(), GL_STATIC_DRAW);
 
     printf("Loaded %s\n", name.c_str());
     error = NULL;
