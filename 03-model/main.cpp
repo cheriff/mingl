@@ -152,12 +152,15 @@ main(int argc, char *argv[])
     const int projection_index = material.uniform("projection").location;
     const int modelview_index  = material.uniform("modelview").location;
 
-#if 1
+#if 0
     printf("DEFAULT MODEL\n");
     auto model = Model();
 #else
-    printf("LOADED MODEL\n");
-    const char *modelname = "model.objb";
+    char *modelname = (char*)"model.objb";
+    if (argc > 1) {
+        modelname = argv[1];
+    }
+
     std::ifstream model_file(modelname, std::ios::in|std::ios::binary);
     if (!model_file) {
         printf("No such fie: %s\n", modelname);
@@ -173,7 +176,7 @@ main(int argc, char *argv[])
     catchGlError();
 
 
-    model.dump();
+ //   model.dump();
 
     for (auto attr: material.attributes) {
         glBindVertexArray(model.vao);
@@ -187,7 +190,7 @@ main(int argc, char *argv[])
                 layout.stride,
                 (void*)(uintptr_t)(layout.offset));
 
-        model.DumpData(layout);
+   //     model.DumpData(layout);
 
     }
     catchGlError();
@@ -213,7 +216,15 @@ main(int argc, char *argv[])
                 1, GL_FALSE, glm::value_ptr(globals.projection));
         glUniformMatrix4fv(modelview_index,
                 1, GL_FALSE, glm::value_ptr(modelview));
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        glDrawElements(
+                GL_TRIANGLES,      // mode
+                model.index_count,    // count
+                model.index_type,   // type
+                (void*)0           // element array buffer offset
+                );
+
+
         catchGlError();
 
 

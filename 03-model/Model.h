@@ -39,7 +39,7 @@ struct Model {
     void dump();
 
     const std::string name;
-    unsigned int vao, vbo;
+    unsigned int vao, vbo, ibo;
 
     ModelGroup group(const std::string g_name) {
         for(auto g : groups) 
@@ -62,6 +62,9 @@ struct Model {
     std::vector<ModelLayout> attributes;
     const char *error;
     std::unique_ptr<uint8_t[]> buffer;
+
+    int index_type;
+    int index_count;
     std::unique_ptr<uint8_t[]> indices;
 
 };

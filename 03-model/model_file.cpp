@@ -83,7 +83,6 @@ Model::Model(std::ifstream &fin, const std::string name)
     int fsize = fin.tellg();
     fin.seekg (0, std::ios::beg);
 
-    printf("Fils is %d big\n", fsize);
     if (fsize < sizeof(FileHeader)) {
         error = "File too small (less than header)";
         return;
@@ -164,7 +163,9 @@ Model::Model(std::ifstream &fin, const std::string name)
         }
     }
 
-    size_t idx_buffer_size = header.index_count * sizeof_gltype(header.index_type);
+    index_count = header.index_count;
+    index_type = header.index_type;
+    size_t idx_buffer_size = index_count * sizeof_gltype(index_type);
     indices = std::unique_ptr<uint8_t[]>(new uint8_t[idx_buffer_size]);
     fin.read(reinterpret_cast<char *>(indices.get()), idx_buffer_size);
     assert((int)fin.tellg()  + header.buffsize == fsize);
@@ -199,16 +200,21 @@ Model::Model(std::ifstream &fin, const std::string name)
 
 
 
-
     glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-
     glBindVertexArray(vao);
-    glBindBuffer (GL_ARRAY_BUFFER, vbo);
 
+    glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ibo);
+
+    glBindBuffer (GL_ARRAY_BUFFER, vbo);
     glBufferData (GL_ARRAY_BUFFER,
             buffsize,
             buffer.get(), GL_STATIC_DRAW);
+
+    glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBufferData (GL_ELEMENT_ARRAY_BUFFER,
+            idx_buffer_size,
+            indices.get(), GL_STATIC_DRAW);
 
     printf("Loaded %s\n", name.c_str());
     error = NULL;

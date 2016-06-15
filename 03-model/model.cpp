@@ -12,9 +12,11 @@ Model::Model()
     #include "tri_geometry.h"
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
+    glGenBuffers(1, &ibo);
 
     glBindVertexArray(vao);
     glBindBuffer (GL_ARRAY_BUFFER, vbo);
+    glBindBuffer (GL_ELEMENT_ARRAY_BUFFER, ibo);
 
     glBufferData (GL_ARRAY_BUFFER,
             triangle_geometry.data_size,
@@ -26,6 +28,17 @@ Model::Model()
     memcpy(buffer.get(),
             triangle_geometry.data,
             triangle_geometry.data_size);
+
+    size_t idx_buffsize = triangle_geometry.num_indixes * sizeof(triangle_geometry.indices[0]);
+    indices = std::unique_ptr<uint8_t[]>(new uint8_t[idx_buffsize]);
+    index_count = triangle_geometry.num_indixes;
+    index_type = GL_UNSIGNED_INT;
+    memcpy(indices.get(),
+            triangle_geometry.indices,
+            idx_buffsize);
+    glBufferData (GL_ELEMENT_ARRAY_BUFFER,
+            idx_buffsize, indices.get(),
+            GL_STATIC_DRAW);
 
     int num_triangles = triangle_geometry.num_triangles;
     int triangle_base = 0;
