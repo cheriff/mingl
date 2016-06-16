@@ -10,8 +10,8 @@
 #include <GLFW/glfw3.h>
 
 const uint32_t expected_magic = 0x0B1EC701;
-const uint16_t expected_major = 0x0001;
-const uint16_t expected_minor = 0x0001;
+const uint16_t expected_major = 0x0002;
+const uint16_t expected_minor = 0x0000;
 
 template<typename T>
 static inline void
@@ -26,8 +26,8 @@ struct FileHeader {
     uint16_t major;
     uint16_t minor;
 
-    uint16_t index_type;
-    uint16_t index_count;
+    uint32_t index_type;
+    uint32_t index_count;
     uint32_t buffsize;
     char     name[16];
     uint32_t num_attrs;
@@ -116,11 +116,13 @@ Model::Model(std::ifstream &fin, const std::string name)
         printf("Buffsize = %d\n", header.buffsize);
     }
 
-    const size_t expected_size = sizeof(header) +
-                                 header.num_attrs   * sizeof(FileAttr)                 +
-                                 header.num_groups  * sizeof(FileGroup)                +
-                                 header.index_count * sizeof_gltype(header.index_type) +
-                                 header.buffsize;
+    size_t expected_size  = 0;
+           expected_size +=sizeof(header);
+           expected_size += header.num_attrs   * sizeof(FileAttr);
+           expected_size += header.num_groups  * sizeof(FileGroup);
+           expected_size += header.index_count * sizeof_gltype(header.index_type);
+           expected_size += header.buffsize;
+
     if (fsize < expected_size) {
         printf("is %d big, expected %d\n", (int)fsize, (int)expected_size);
         // File is too small to contain what the header promises it does.
